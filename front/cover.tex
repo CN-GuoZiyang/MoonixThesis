@@ -17,78 +17,59 @@
   %=========
   % 中文信息
   %=========
-  % ctitleone={局部多孔质气体静压},%本科生封面使用
-  % ctitletwo={轴承关键技术的研究},%本科生封面使用
-  ctitlecover={局部多孔质气体静压轴承关键技术的研究},%放在封面中使用，自由断行
-  ctitle={局部多孔质气体静压轴承关键技术的研究},%放在原创性声明中使用
+  ctitleone={\large{基于C语言的RISC-V}},%本科生封面使用
+  ctitletwo={\large{操作系统设计与实现}},%本科生封面使用
+  ctitlecover={基于C语言的RISC-V操作系统设计与实现},%放在封面中使用，自由断行
+  ctitle={基于C语言的RISC-V操作系统设计与实现},%放在原创性声明中使用
   % csubtitle={一条副标题}, %一般情况没有，可以注释掉
   cxueke={工学},
-  csubject={仪器科学与技术},
-  caffil={仪器科学与工程学院},
-  cauthor={于冬梅},
-  csupervisor={某某某教授},
-  cassosupervisor={某某某教授}, % 副指导老师
-  ccosupervisor={某某某教授}, % 联合指导老师
+  csubject={计算机科学与技术},
+  caffil={计算学部},
+  cauthor={郭子阳},
+  csupervisor={刘国军},
   % 日期自动使用当前时间，若需指定按如下方式修改：
-  %cdate={超新星纪元},
-  cstudentid={9527},
-  % cstudenttype={同等学力人员}, %非全日制教育申请学位者
+  cdate={2021年6月1日},
+  cstudentid={1170300520},
   cnumber={no9527}, %编号
-  % cpositionname={哈铁西站}, %博士后站名称
-  % cstartdate={3050年9月10日}, %到站日期
-  % cenddate={3090年10月10日}, %出站日期
-  %（同等学力人员）、（工程硕士）、（工商管理硕士）、
-  %（高级管理人员工商管理硕士）、（公共管理硕士）、（中职教师）、（高校教师）等
-  %
-  %
   %=========
   % 英文信息
   %=========
-  etitle={Research on key technologies of partial porous externally pressurized gas bearing},
+  etitle={Design and implementation of a C-based RISC-V operating system},
   % esubtitle={This is the sub title},
   exueke={Engineering},
-  esubject={Instruments Science and Technology},
-  eaffil={\emultiline[t]{School of Instrumentation Science \\ and Engineering}},
-  eauthor={Yu Dongmei},
-  esupervisor={Professor XXX},
-  eassosupervisor={XXX},
+  esubject={Computer Science and Technology},
+  eaffil={\emultiline[t]{School of Computer Science \\ and Engineering}},
+  eauthor={Guo Ziyang},
+  esupervisor={Liu Guojun},
   % 日期自动生成，若需指定按如下方式修改：
   % edate={December, 2017},
   % estudenttype={Master of Art},
   %
   % 关键词用“英文逗号”分割
-  ckeywords={\TeX, \LaTeX, CJK, 嗨！, thesis},
-  ekeywords={\TeX, \LaTeX, CJK, template, thesis},
+  ckeywords={RISC-V, 操作系统, 内存管理，ELF文件, 文件系统, 壳（shell）},
+  ekeywords={RISC-V, operating system, memory management, ELF file, file system, shell},
 }
 
 \begin{cabstract}
 
-摘要的字数（以汉字计），硕士学位论文一般为500 $\sim$ 1000字，博士学位论文为1000 $\sim$ 2000字，
-均以能将规定内容阐述清楚为原则，文字要精练，段落衔接要流畅。摘要页不需写出论文题目。
-英文摘要与中文摘要的内容应完全一致，在语法、用词上应准确无误，语言简练通顺。
-留学生的英文版博士学位论文中应有不少于3000字的“详细中文摘要”。
+指令集架构（ISA）是计算机的一种抽象模型，是计算机体系结构模型中与程序设计相关的部分，也是处理器的灵魂。现阶段市场上常见的ISA，如x86和ARM，都是商业闭源的，不利于二次开发。于是RISC-V一出现，就受到了各大研究机构和高校的青睐。同样，这款完全开源的指令集架构，也有助于解决我国当前面临的芯片困境，进一步反哺国内生态，尤其是操作系统方面，以保障我国在核心产业的自主可控。
 
-  关键词是为了文献标引工作、用以表示全文主要内容信息的单词或术语。关键词不超过 5
-  个，每个关键词中间用分号分隔。（模板作者注：关键词分隔符不用考虑，模板会自动处
-  理。英文关键词同理。）
+尽管RISC-V已经出现多年，国内对它的研究却一直局限于嵌入式和移动设备领域，同时，对于RISC-V指令集架构的通用操作系统的研究，相关资料较少且专业性过强，成为阻碍其进入高校研究和课堂教学的重要因素。
+
+为了解决上述问题，进一步推动RISC-V在高校教学中的沉淀，促进RISC-V的传播，本论文讨论了一种基于C语言的RISC-V操作系统的设计，基于模块对整个工程进行划分，随后进一步细化了各个模块的具体设计，譬如中断的模式、线程调度算法等，并主要给出各个模块的实现细节，最后针对此操作系统，给出了一份比较详细的实现文档。
+
+本文设计实现的基于C语言的RISC-V操作系统，结构清晰，方便横向扩展。同时代码规范，注释和文档完整详细，可用于教学用途，并可以在客观上推动RISC-V开源社区的发展。
+
 \end{cabstract}
 
 \begin{eabstract}
-   An abstract of a dissertation is a summary and extraction of research work
-   and contributions. Included in an abstract should be description of research
-   topic and research objective, brief introduction to methodology and research
-   process, and summarization of conclusion and contributions of the
-   research. An abstract should be characterized by independence and clarity and
-   carry identical information with the dissertation. It should be such that the
-   general idea and major contributions of the dissertation are conveyed without
-   reading the dissertation.
 
-   An abstract should be concise and to the point. It is a misunderstanding to
-   make an abstract an outline of the dissertation and words ``the first
-   chapter'', ``the second chapter'' and the like should be avoided in the
-   abstract.
+Instruction Set Architecture (ISA) is an abstract model of computer, a part of computer architecture model related to programming, and also the soul of the processor. Currently, common ISA such as x86 and ARM, are commercial closed source, which is not conducive to secondary development. As soon as RISC-V appeared, it was favored by various research institutions and universities. In the same way, this completely open source instruction set architecture will also help solve China's current chip dilemma and further feed the domestic ecology, especially in the aspect of operating system, so as to guarantee China's autonomy and control in the core industry.
 
-   Key words are terms used in a dissertation for indexing, reflecting core
-   information of the dissertation. An abstract may contain a maximum of 5 key
-   words, with semi-colons used in between to separate one another.
+Although RISC-V has been brought up for many years, domestic research on RISC-V has been limited to the field of embedded and mobile devices. At the same time, for the research on RISC-V general operating system, there are few relevant materials and it is too specialized, which has become an important factor hindering its entry into university research and classroom teaching.
+
+In order to solve the above problems, further promote the participation of RISC-V in college teaching, promote the spread of RISC-V, this paper discusses a RISC-V operating system based on C language design. This paper first divides the whole project based on modules, then further discusses the specific design of each module, such as interrupt mode, thread scheduling, etc., and gives the implementation details of each module. Finally, a detailed implementation document is given for this operating system.
+
+The RISC-V operating system based on C language designed and implemented in this paper has a clear structure and is convenient for horizontal expansion. At the same time, the code conforms to the specification, the comments and documentation are comprehensive and detailed, so as to be used for educational purposes. And it can objectively promote the development of RISC-V open source community.
+
 \end{eabstract}
