@@ -100,8 +100,15 @@
 %\input{front/denotation}%物理量名称表,符合规范为主，有要求添加
 \tableofcontents %目录
 \mainmatter
-\include{body/regu}
 \include{body/introduction}
+\include{body/riscv}
+\include{body/overall}
+\include{body/environment}
+\include{body/interrupt}
+\include{body/memory}
+\include{body/thread}
+\include{body/filesystem}
+\include{body/shell}
 \backmatter
 \include{back/conclusion}   % 结论
 \bibliographystyle{hithesis} %如果没有参考文献时候
@@ -114,12 +121,10 @@
 \begin{appendix}%附录
 \input{back/appA.tex}
 \end{appendix}
-\include{back/publications}    % 所发文章
 \include{back/ceindex}    % 索引, 根据自己的情况添加或者不添加，选择自动添加或者手工添加。
 \authorization %授权
 %\authorization[saomiao.pdf] %添加扫描页的命令，与上互斥
 \include{back/acknowledgements} %致谢
-\include{back/resume}          % 博士学位论文有个人简介
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % 本科书序为：
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
