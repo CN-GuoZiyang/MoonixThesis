@@ -103,7 +103,6 @@
 \include{body/introduction}
 \include{body/riscv}
 \include{body/overall}
-\include{body/environment}
 \include{body/interrupt}
 \include{body/memory}
 \include{body/thread}
@@ -113,37 +112,12 @@
 \include{back/conclusion}   % 结论
 \bibliographystyle{hithesis} %如果没有参考文献时候
 \bibliography{reference}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%-- 注意：以下本硕博、博后书序不一致 --%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% 硕博书序
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\begin{appendix}%附录
-\input{back/appA.tex}
-\end{appendix}
-\include{back/ceindex}    % 索引, 根据自己的情况添加或者不添加，选择自动添加或者手工添加。
+
 \authorization %授权
-%\authorization[saomiao.pdf] %添加扫描页的命令，与上互斥
-\include{back/acknowledgements} %致谢
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% 本科书序为：
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% \authorization %授权
 % % \authorization[saomiao.pdf] %添加扫描页的命令，与上互斥
-% \include{back/acknowledgements} %致谢
-% \begin{appendix}%附录
-% \input{back/appendix01}%本科生翻译论文
-% \end{appendix}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% 博后书序
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% \include{back/acknowledgements} %致谢
-% \include{back/doctorpublications}    % 所发文章
-% \include{back/publications}    % 所发文章
-% \include{back/resume}          % 博士学位论文有个人简介
-% \include{back/correspondingaddr} %通信地址
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\include{back/acknowledgements} %致谢
+\begin{appendix}%附录
+\input{back/environment}%本科生翻译论文
+\end{appendix}
+
 \end{document}
-% Local Variables:
-% TeX-engine: xetex
-% End:
