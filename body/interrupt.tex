@@ -3,7 +3,7 @@
 \chapter{中断处理模块设计与实现}[interrupt]
 \label{chapter:interrupt}
 
-\section{模块设计}
+\section{模块概述}
 
 \ref{sec:interrupt} 节中介绍过，RISC-V支持两种方式的中断处理，分别是Direct模式与Vectored模式。采用Direct模式时，当任意中断发生后，都会跳转到stvec中的BASE地址处；若是采用Vectored模式，则类似于Linux内核中使用的中断向量表，需要首先进行向量表的填充，不利于统一处理或忽略一些中断，且填表过程比较繁琐，所以Moonix中采用Direct模式来对中断进行统一处理。在中断处理函数中就可以很方便地根据中断类型来对不同的类型调用不同的处理函数分流处理流程。
 
