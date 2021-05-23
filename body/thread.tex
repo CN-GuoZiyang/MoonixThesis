@@ -130,3 +130,25 @@ idleMain函数首先关闭中断响应，以防止调度过程被中断打断，
 	\caption{线程切换时间线}
 	\label{pic:threadswitch}
 \end{figure}
+
+在线程用尽时间片，返回到idle线程后，会将上一个线程的资源回收，并防止到线程队列的队尾。随后，idle线程会决策下一个要运行的线程，决策的方式，就是round-robin算法。
+
+Round-Robin算法是一种抢占式调度算法，这意味着如果线程在其拥有的时间片内没有完成任务的话，会被内核打断并让出CPU资源，供下一个线程使用。Round-Robin算法会将时间片平等地分配给所有线程，在较长时间内，每个线程都有均等的机会占用CPU。其大致的思想可大致概括为：
+
+\begin{enumerate}
+	\item 将所有的线程存入一个优先队列
+	\item 每次调度时都取队首的线程占用CPU
+	\item 内核定时去检查正在运行的线程是否用完了时间片，如果没有用完就继续执行，否则就将这个线程放到队尾，执行下一个队首线程。
+\end{enumerate}
+
+Moonix使用一个双向环形链表来实现队列，链表的节点按照tid+1作为下标存放在数组中，其中下标0处为Dummy Head，用于快速找到队列头。队列中的元素如代码 \ref{lst:rrinfo} 所示，并不保存实际的线程结构，仅仅以下标记录线程的tid。这种方式侵入性较小，调度器只会向内核返回下一个需要执行的线程的tid，耦合度较低，方便替换和扩展不同的调度算法。
+
+\begin{lstlisting}[language={C}, caption={线程调度器元素}, label={lst:rrinfo}]
+typedef struct
+{
+	int valid;
+	usize time;
+	int prev;
+	int next;
+} RRInfo;
+\end{lstlisting}
