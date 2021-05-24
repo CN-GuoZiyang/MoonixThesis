@@ -2,3 +2,48 @@
 
 \chapter{壳的实现}[shell]
 \label{chapter:shell}
+
+\section{模块概述}
+
+Moonix操作系统在初始化阶段，做的最后一件事，就是加载文件系统的/bin/sh可执行文件，并将其作为用户进程运行起来。
+
+/bin/sh是一个执行在用户态的shell，是用户和Moonix交互的唯一途径。用户可以直接在shell中键入文件系统上可执行文件的路径，操作系统会将这个文件加载到内核并解析映射，并执行这个可执行文件，在该文件执行结束后，会再切换会shell进程，等待用户的其他命令。除了执行可执行文件外，shell还内建了几个简单的命令，如cd、ls、pwd等，方便用户可以穿梭在文件夹中，方便查看与执行文件。
+
+\section{用户态环境调用}
+
+shell是一个U-Mode进程，而内核运行在S-Mode下。通常，一个U-Mode进程的能力十分有限，大部分能力都需要依赖操作系统功能，甚至输出一个字符到屏幕上，都必须通过操作系统。U-Mode环境与内核唯一的沟通渠道，就是通过环境调用的方式。
+
+RISC-V规范规定，环境调用的调用号通过a7寄存器传递，参数通过a1、a2和a3寄存器，处理结果的返回值通过a0寄存器传递。如代码 \ref{lst:shell} 所示，Moonix通过内联汇编的方式，执行ecall指令，并在执行指令之前填充参数和调用号寄存器。
+
+当一个U-Mode环境调用发生时，Moonix内核会接收到一个系统中断，中断类型是USER\_ENV\_CALL。Moonix随后会从a7寄存器中取出中断调用号，从a1、a2、a3寄存器中取出参数，根据调用号的类型进行不同的处理，并将返回值写入a0寄存器中，结束这次中断处理。
+
+当shell通过EXEC环境调用执行某个可执行文件时，由于此时shell也在运行状态，由于被执行的进程和shell处于并发执行状态，两个进程的输出可能会混杂到一起。所以在执行EXEC系统调用时，Moonix会挂起发起系统调用的线程，使得shell进入休眠状态，直到被执行的进程结束，shell进程才会被重新调度。
+
+\begin{lstlisting}[language={C}, caption={U-Mode环境调用}, label={lst:shell}]
+typedef enum {
+	Shutdown = 13,
+	LsDir = 20,
+	CdDir = 21,
+	Pwd = 22,
+	Open = 56,
+	Close = 57,
+	Read = 63,
+	Write = 64,
+	Exit = 93,
+	Exec = 221,
+} SyscallId;
+
+#define sys_call(__num, __a0, __a1, __a2, __a3)                          \
+({                                                                  \
+	register unsigned long a0 asm("a0") = (unsigned long)(__a0);    \
+	register unsigned long a1 asm("a1") = (unsigned long)(__a1);    \
+	register unsigned long a2 asm("a2") = (unsigned long)(__a2);    \
+	register unsigned long a3 asm("a3") = (unsigned long)(__a3);    \
+	register unsigned long a7 asm("a7") = (unsigned long)(__num);   \
+	asm volatile("ecall"                                            \
+	: "+r"(a0)                                          \
+	: "r"(a1), "r"(a2), "r"(a3), "r"(a7)                         \
+	: "memory");                                        \
+	a0;                                                             \
+})
+\end{lstlisting}
