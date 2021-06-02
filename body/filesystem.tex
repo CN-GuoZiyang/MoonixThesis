@@ -5,9 +5,9 @@
 
 \section{Simple File System}
 
-SimpleFileSystem是一个简单的文件系统，是Unix File System的一个简易实现。Moonix对这个文件系统进行了一定的魔改，但仍然采用这个名字，因为这个文件系统依然足够simple。SimpleFileSystem以下简称SimpleFS。
+SimpleFileSystem是一个简单的文件系统，是Unix File System\cite{ufs}的一个简易实现，现多用于UEFI中。Moonix对这个文件系统进行了一定的魔改，但仍然采用这个名字，因为这个文件系统依然足够simple。SimpleFileSystem结构简单清晰，十分适合教学用途。SimpleFileSystem以下简称SimpleFS。
 
-SimpleFS的总体结构如图 \ref{pic:sfs} 所示，将磁盘分成了数个大小为4096字节的磁盘块。
+SimpleFS的总体结构如图 \ref{pic:sfs} 所示，将磁盘分成了数个大小为4096字节的磁盘块。Moonix所使用的文件系统镜像大小为256个磁盘块，即1MB，初始文件系统中共有1个超级块、1个空闲块和21个Inode块，剩余的空间就是这个文件系统的可用空间。
 
 \begin{figure}[htpb]
 	\centering
@@ -54,6 +54,14 @@ typedef struct
 \end{figure}
 
 关于直接磁盘块和间接磁盘块，如图 \ref{pic:inode} 所示。每个Inode块中有一个长度为12的direct数据，如果blocks字段小于等于12，可以直接使用该数组存储磁盘块号，否则，由indirect字段指向一个Indirect Block，在该磁盘块中可以存储更多的磁盘块号。
+
+SimpleFS 的相关数据如下：
+
+\begin{itemize}
+	\item 一个 Freemap 块可以表示 32K 个磁盘块的空闲状况
+	\item 一个文件夹下，除去 “.” 和 “..” 以外，最多可以存储 1034 个文件或文件夹
+	\item 单个普通文件大小最大为 4.04 MB
+\end{itemize}
 
 \section{内核驱动}
 

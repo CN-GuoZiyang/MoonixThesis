@@ -56,7 +56,7 @@
 
 尽管RISC-V已经出现多年，国内对它的研究却一直局限于嵌入式和移动设备领域，同时，对于RISC-V指令集架构的通用操作系统的研究，相关资料较少且专业性过强，成为阻碍其进入高校研究和课堂教学的重要因素。
 
-为了解决上述问题，进一步推动RISC-V在高校教学中的沉淀，促进RISC-V的传播，本论文讨论了一种基于C语言的RISC-V操作系统的设计，基于模块对整个工程进行划分，随后进一步细化了各个模块的具体设计，譬如中断的模式、线程调度算法等，并主要给出各个模块的实现细节，最后针对此操作系统，给出了一份比较详细的实现文档。
+为了解决上述问题，进一步推动RISC-V在高校教学中的沉淀，促进RISC-V的传播，本论文讨论了一种基于C语言的RISC-V操作系统的设计，基于模块对整个工程进行划分，随后进一步细化了各个模块的具体设计，譬如中断的模式、线程调度算法等，并主要给出各个模块的实现细节，最后针对此操作系统，给出了一份比较详细的实现文档。本文实现的操作系统主要分为四个模块：中断管理、内存管理、线程调度和文件系统。中断模块主要用于处理环境调用，同时处理定时器中断来辅助线程调度；内存管理模块对操作系统的可用物理内存进行管理分配，内存管理以两个粒度进行：动态内存分配和按页分配，并实现虚拟内存以进行进程间的代码数据隔离；线程调度保证了所有正在运行的线程都有平等使用CPU的机会，并根据需要动态挂起和唤醒线程；文件系统对操作系统开放了一个统一的文件读写接口，使得不同类型的文件实现细节对操作系统来说是透明的。
 
 本文设计实现的基于C语言的RISC-V操作系统，结构清晰，方便横向扩展。同时代码规范，注释和文档完整详细，可用于教学用途，并可以在客观上推动RISC-V开源社区的发展。
 
@@ -68,7 +68,7 @@ Instruction Set Architecture (ISA) is an abstract model of computer, a part of c
 
 Although RISC-V has been brought up for many years, domestic research on RISC-V has been limited to the field of embedded and mobile devices. At the same time, for the research on RISC-V general operating system, there are few relevant materials and it is too specialized, which has become an important factor hindering its entry into university research and classroom teaching.
 
-In order to solve the above problems, further promote the participation of RISC-V in college teaching, promote the spread of RISC-V, this paper discusses a RISC-V operating system based on C language design. This paper first divides the whole project based on modules, then further discusses the specific design of each module, such as interrupt mode, thread scheduling, etc., and gives the implementation details of each module. Finally, a detailed implementation document is given for this operating system.
+In order to solve the above problems, further promote the participation of RISC-V in college teaching and promote the spread of RISC-V, this paper discusses a RISC-V operating system based on C language design. This paper first divides the whole project based on modules, then further discusses the specific design of each module, such as interrupt mode, thread scheduling, etc., and gives the implementation details of each module. Finally, a detailed implementation document is given for this operating system. The operating system realized in this paper is mainly divided into four modules: interrupt management, memory management, thread scheduling and file system. The interrupt management module is mainly used to handle the environment call and timer interrupt to assist thread scheduling. The memory management module manages and allocates the physical memory the system can use. The memory management is carried out in two granularity: dynamic memory allocation and page-based allocation, and the virtual memory is realized to isolate the code and data between processes. Thread scheduling ensures that all running threads have equal access to CPU, and dynamically suspends and awakens threads as needed. The file system provides a unified file reading and writing interface to the operating system, making the implementation details of different types of files transparent to the operating system.
 
 The RISC-V operating system based on C language designed and implemented in this paper has a clear structure and is convenient for horizontal expansion. At the same time, the code conforms to the specification, the comments and documentation are comprehensive and detailed, so as to be used for educational purposes. And it can objectively promote the development of RISC-V open source community.
 

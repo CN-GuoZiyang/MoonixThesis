@@ -34,9 +34,9 @@ Moonix中使用结构体InterruptContext来保存各种寄存器的信息，它�
 
 \subsection{保存中断上下文}
 
-中断上下文需要被保存在内核栈上，由于在进入中断之前，CPU可能位于U-Mode，也可能位于S-Mode，所以需要首先判断当前模式，如果跳转之前就位于S-Mode，则无需做处理；否则需要切换sp指针到内核栈。RISC-V中提供了sscratch寄存器，来临时保存临时栈的指针。
+中断上下文需要被保存在内核栈上，由于在进入中断之前，CPU可能位于U-Mode，也可能位于S-Mode，所以需要首先判断当前模式，如果跳转之前就位于S-Mode，则无需做处理；否则需要切换sp指针到内核栈。RISC-V指令集提供了sscratch寄存器，用于保存临时栈的指针。
 
-Moonix规定，若在中断之前处于U-Mode，则sscratch寄存器中保存的是内核栈地址；否则中断之前处于S-Mode，sscratch中保存的是 0。这样，Moonix即可根据进入中断时的sscratch的值，来判断进入中断前的CPU状态。
+sscratch寄存器的使用方法可由操作系统来指定，指令集没有硬性要求，在Moonix中，若在中断之前处于U-Mode，则sscratch寄存器中保存的是内核栈地址；否则中断之前处于S-Mode，sscratch中保存的是0。这样，Moonix即可根据进入中断时的sscratch的值，来判断进入中断前的CPU状态。
 
 \clearpage
 

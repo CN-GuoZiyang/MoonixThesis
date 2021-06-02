@@ -24,21 +24,21 @@ RISC-V是一个基于精简指令集原则的开源指令集架构，该项目20
 
 国内方面对于这方面的研究比较少，基本只有清华大学的教学用操作系统rCore。清华大学曾经使用x86架构的uCore操作系统进行课程实验。2020年开始增加基于Rust语言、RISC-V架构的rCore可以课程实验的可选项。
 
-上面提到的三种操作系统实现的横向对比见表\ref{tab:os-compare}。
+上面提到的三种操作系统实现的横向对比见表\ref{tab:os-compare}，最后一列为本文实现的操作系统 Moonix 的相关数据。
 
 \begin{table}[h]
 	\centering
 	\setlength{\belowcaptionskip}{2pt}
 	\caption{几种RISC-V架构操作系统的横向比较}
 	\label{tab:os-compare}
-	\begin{tabular}{|c|c|c|c|}
+	\begin{tabular}{|c|c|c|c|c|}
 		\hline
-		& xv6-riscv & BlogOS & rCore   \\ \hline
-		开发语言       & C语言       & Rust语言 & Rust语言  \\ \hline
-		多核支持       & 支持        & 不支持    & 支持      \\ \hline
-		代码量级       & 9064      & 1276   & 3244    \\ \hline
-		Bootloader & 自研        & 自研     & OpenSBI \\ \hline
-		其他架构支持     & 不支持       & 不支持    & 支持      \\ \hline
+		& xv6-riscv & BlogOS & rCore & Moonix   \\ \hline
+		开发语言       & C语言       & Rust语言 & Rust语言 & C语言  \\ \hline
+		多核支持       & 支持        & 不支持    & 支持   & 不支持  \\ \hline
+		代码量级       & 9064      & 1276   & 3244   & 4027  \\ \hline
+		Bootloader & 自研        & 自研     & OpenSBI  & OpenSBI \\ \hline
+		其他架构支持     & 不支持       & 不支持    & 支持    & 不支持   \\ \hline
 	\end{tabular}
 \end{table}
 
