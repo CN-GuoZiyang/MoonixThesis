@@ -5,7 +5,7 @@
 
 \section{Simple File System}
 
-SimpleFileSystem是一个简单的文件系统，是Unix File System\cite{ufs}的一个简易实现，现多用于UEFI中。Moonix对这个文件系统进行了一定的魔改，但仍然采用这个名字，因为这个文件系统依然足够simple。SimpleFileSystem结构简单清晰，十分适合教学用途。SimpleFileSystem以下简称SimpleFS。
+SimpleFileSystem是一个简单的文件系统，是Unix File System\cite{ufs}\cite{DBLP:conf/amast/Heisel95}的一个简易实现，现多用于UEFI中。Moonix对这个文件系统进行了一定的魔改，但仍然采用这个名字，因为这个文件系统依然足够simple。SimpleFileSystem结构简单清晰，十分适合教学用途。SimpleFileSystem以下简称SimpleFS。
 
 SimpleFS的总体结构如图 \ref{pic:sfs} 所示，将磁盘分成了数个大小为4096字节的磁盘块。Moonix所使用的文件系统镜像大小为256个磁盘块，即1MB，初始文件系统中共有1个超级块、1个空闲块和21个Inode块，剩余的空间就是这个文件系统的可用空间。
 
@@ -19,6 +19,7 @@ SimpleFS的总体结构如图 \ref{pic:sfs} 所示，将磁盘分成了数个大
 
 一个SimpleFS文件系统的第一块恒为超级块（SuperBlock），它记录了SimpleFS的基本信息，如总磁盘块数、未使用的磁盘块数、Freemap块个数等。紧随其后的是若干Freemap块，它记录了整个文件系统中磁盘块的占用情况。Freemap块使用一个bit表示一个块，0为未被占用，1为已被占用。通过Freemap块Moonix就可以快速找到空闲可用的磁盘块。Freemap块后面是表示根文件系统的Inode块。SimpleFS也是以树状结构组织文件的，Root即为 “/” 文件夹。Root Inode后就是其他文件的Inode或者数据块，这些块不会做特殊的排序，查找文件需要从根目录开始查找。
 
+\begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={SimpleFS超级块结构}, label={lst:superblock}]
 typedef struct {
 	uint32 magic;               // 魔数
@@ -28,9 +29,11 @@ typedef struct {
 	uint8 info[32];             // 其他信息
 } SuperBlock;
 \end{lstlisting}
+\end{minipage}
 
 超级块的结构如代码 \ref{lst:superblock} 所示。第一个字段就是magic number。这个字段恒为 0x4D534653，即ASCII码 “M”、“S”、“F”、“S”。Moonix初始化文件系统时，会首先检查魔数以确定文件系统类型，blocks字段表示这个文件系统一共占用多少个磁盘块。unusedBlocks字段表示这个文件系统目前剩余的空闲磁盘块个数。freemapBlocks表示Freemap块的总个数，这个字段的更重要用处在于推断出Root Inode所在的磁盘块号。最后就是info字段，这是一个字符串，记录了一些其他信息。超级块的实际内容很小，只有48字节，剩余空间由0填充。
 
+\begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={SimpleFS Inode结构}, label={lst:inode}]
 typedef struct
 {
@@ -42,12 +45,13 @@ typedef struct
 	uint32 indirect;            // 间接磁盘块
 } Inode;
 \end{lstlisting}
+\end{minipage}
 
 一个 Inode 块代表了一个文件或文件夹，结构如代码 \ref{lst:inode} 所示。type字段表示该Inode所代表的文件的类型，可用取值有TYPE\_FILE（普通文件）或TYPE\_DIR（文件夹）。当type取TYPE\_DIR时，size字段为0。并且直接磁盘块和间接磁盘块都是指向存储在该文件夹下的文件的Inode。当type取TYPE\_FILE时，磁盘块指向实际的数据块。当Inode类型为文件夹时，direct[0]和direct[1]分别存储指向当前和指向上一级文件夹的 Inode。
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.70\textwidth]{inode}
+	\includegraphics[width=0.80\textwidth]{inode}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{Inode直接磁盘块与间接磁盘块}
 	\label{pic:inode}

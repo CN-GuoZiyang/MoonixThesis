@@ -11,7 +11,7 @@ Moonix整体采用了宏内核模式。宏内核的优点是执行速度快，�
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.55\textwidth]{moonixtotal}
+	\includegraphics[width=0.75\textwidth]{moonixtotal}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{Moonix体系结构}
 	\label{pic:moonixtotal}
@@ -25,10 +25,22 @@ Moonix采用RISC-V指令集架构提供的Sv39系统来对内存进行虚拟化�
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.55\textwidth]{mem}
+	\includegraphics[width=0.85\textwidth]{mem}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{Moonix内存结构}
 	\label{pic:moonixmem}
 \end{figure}
 
 在进程的虚拟地址空间中，进程的私有代码和数据占据了低地址空间，而内核的代码和数据占据了高地址空间。内核需要被映射到每个进程的高地址处，来保证用户进程在发起系统调用陷入内核时，进程能够寻找到内核的处理代码。
+
+\begin{figure}[htpb]
+	\centering
+	\includegraphics[width=\textwidth]{MoonixRun}
+	\setlength{\abovecaptionskip}{2pt}
+	\caption{Moonix运行效果}
+	\label{pic:moonixrun}
+\end{figure}
+
+目前Moonix内置了两个简单的用户程序，分别是输出10遍相同字符串的hello程序，和计算并输出小于50的斐波那契数列的fib50，它们都位于文件系统上的/bin文件夹中。
+
+图 \ref{pic:moonixrun} 是当前Moonix操作系统的运行示例。在Moonix初始化结束之后，会输出“Welcome to Moonix!”，并启动一个可交互的shell进程。用户可以在shell中输出简单的内置命令交互，或者输入可执行文件的路径来执行程序。shell目前内置cd、ls、pwd和shutdown命令。在示例中，用户首先cd到/bin文件夹下，运行了fib50和hello程序，接着再cd回上一级文件夹，使用相对路径的方式再次执行了一次fib50程序，最后shutdown关闭Moonix系统。

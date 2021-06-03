@@ -21,6 +21,7 @@
 
 因此，在处理中断前，Moonix需要保存所有可能被修改的寄存器，并在中断处理完成后恢复。这些包括所有的通用寄存器。同时由于scause、sepc和stval这三个寄存器，在中断发生时会被CPU自动写入中断相关信息，所以也需要额外保存。保存这三个中断信息寄存器的原因是为了使得Moonix支持中断的递归处理，即在某个中断处理的过程中，Moonix有能力保存中断处理的现场转而去处理另一个突然发生的中断。由于中断过程可能伴随特权级的变化，还需要多保存一个sstatus。
 
+\begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={上下文结构定义}, label={lst:context}]
 typedef struct
 {
@@ -29,6 +30,7 @@ typedef struct
 	usize sepc;
 } InterruptContext;
 \end{lstlisting}
+\end{minipage}
 
 Moonix中使用结构体InterruptContext来保存各种寄存器的信息，它代表的原来程序运行的上下文。InterruptContext定义如代码 \ref{lst:context} 所示。scause和stval这两个寄存器的值将在中断处理过程中作为参数传递，由于处理过程对原程序是透明的，所以无需保存这两个寄存器。
 
@@ -38,8 +40,7 @@ Moonix中使用结构体InterruptContext来保存各种寄存器的信息，它�
 
 sscratch寄存器的使用方法可由操作系统来指定，指令集没有硬性要求，在Moonix中，若在中断之前处于U-Mode，则sscratch寄存器中保存的是内核栈地址；否则中断之前处于S-Mode，sscratch中保存的是0。这样，Moonix即可根据进入中断时的sscratch的值，来判断进入中断前的CPU状态。
 
-\clearpage
-
+\begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={保存中断上下文}, label={lst:savecontext}]
 __interrupt:
 	# 交换 sscratch 和 sp
@@ -81,12 +82,13 @@ from_user:
 	csrr    a2, stval
 	jal     handleInterrupt
 \end{lstlisting}
+\end{minipage}
 
 整个保存操作实现见代码 \ref{lst:savecontext}。中断处理的入口函数为\_\_interrupt，即stvec中的BASE字段设置为\_\_interrupt的地址。Moonix首先判断中断发生前的CPU模式，并切换到内核栈，栈指针向下移动以在栈上留出一个InterruptContext的内存区域。在保存上下文操作完成后，将sscratch的值保存在s0寄存器中，并将sscratch清零，以保证在处理中断时再次发生中断后，能满足Moonix对sscratch的规定。保存完毕后，栈上布局如图 \ref{pic:interruptframe} 所示。注意，如果进入中断前位于U-Mode，则栈上x2指向原线程的用户栈顶。
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.55\textwidth]{interruptframe}
+	\includegraphics[width=0.7\textwidth]{interruptframe}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{保存中断上下文}
 	\label{pic:interruptframe}
@@ -106,8 +108,8 @@ Moonix最后执行sret指令，控制流将跳转到sepc寄存器中保存的地
 
 在Moonix线程创建时，将借助中断恢复的机制来对线程的模式和寄存器等进行设置填充，以进行初始化。更具体的细节见第 \ref{chapter:thread} 章。
 
-\clearpage
 
+\begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={恢复中断上下文}, label={lst:restorecontext}]
 __restore:
 	# 恢复 CSR
@@ -140,6 +142,7 @@ to_kernel:
 	LOAD    x2, 2
 	sret
 \end{lstlisting}
+\end{minipage}
 
 \section{条件变量与标准输入缓冲的实现}
 \label{sec:condition}
@@ -150,7 +153,7 @@ Moonix使用条件变量机制来解决这个问题，当线程检查到当前�
 
 标准输入缓冲维护了一个字符队列和一个条件变量，而条件变量也只是维护了一个等待队列，保存了等待条件满足的线程的tid。Moonix定义结构如代码 \ref{lst:stdin} 所示。
 
-\begin{figure}[htpb]
+\begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={标准输入缓冲和条件变量}, label={lst:stdin}]
 typedef struct {
 	Queue waitQueue;
@@ -162,13 +165,13 @@ struct
 	Condvar pushed;
 } STDIN;
 \end{lstlisting}
-\end{figure}
+\end{minipage}
 
 当一个线程排队进入临界区尝试获取输入的字符时，如果字符队列中有字符，则直接获取返回。若无字符，则将自身放入等待队列中并挂起。当有字符被输入时，Moonix会首先将字符存入字符队列，并检查等待队列中是否有线程在等待，如果有则唤醒队首线程，该线程会重新尝试进入临界区获取字符。整个流程示意如图 \ref{pic:stdin}。
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.4\textwidth]{stdin}
+	\includegraphics[width=0.5\textwidth]{stdin}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{标准输入缓冲区示意}
 	\label{pic:stdin}
