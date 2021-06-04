@@ -9,6 +9,30 @@ Moonix操作系统在初始化阶段，做的最后一件事，就是加载文�
 
 /bin/sh是一个执行在用户态的shell，是用户和Moonix交互的唯一途径。用户可以直接在shell中键入文件系统上可执行文件的路径，操作系统会将这个文件加载到内核并解析映射，并执行这个可执行文件，在该文件执行结束后，会再切换会shell进程，等待用户的其他命令。除了执行可执行文件外，shell还内建了几个简单的命令，如cd、ls、pwd等，方便用户可以穿梭在文件夹中，方便查看与执行文件。
 
+\section{用户程序的加载与运行}
+
+本节以shell程序为例。
+
+在线程初始化的最后部分，Moonix操作系统从文件系统中加载/bin/sh，并将其初始化为用户进程，添加到进程调度中。如代码 \ref{lst:initshell} 所示。
+
+\begin{minipage}[c]{0.95\textwidth}
+\begin{lstlisting}[language={C}, caption={Moonix加载shell}, label={lst:initshell}]
+/* 启动终端 */
+Inode *shInode = lookup(0, "/bin/sh");
+char *buf = kalloc(shInode->size);
+readall(shInode, buf);
+Thread t = newUserThread(buf);
+kfree(buf);
+addToCPU(t);
+\end{lstlisting}
+\end{minipage}
+
+Moonix首先使用文件系统的lookup接口，从文件系统中获取到了保存/bin/sh文件信息的Inode，并根据Inode中记录的文件大小，使用动态内存分配，在堆空间中开辟了一块缓存buf。随后使用文件系统的readall接口，从文件系统中读取了程序的数据文件，并保存到了buf中。随后根据这个文件构建了一个用户进程，添加到CPU的进程调度中。
+
+构建用户进程的关键点在于解析一个完整的程序文件，这个程序文件是ELF格式的可执行文件。Moonix首先根据ELF头的信息，找到程序头表相对于ELF文件开头的偏移，进而找到文件头表。文件头中的p\_type描述了段类型，Moonix只需要将LOAD类型的段装载进内存即可。内核将代码或数据复制进物理内存之后，需要在页表中映射到虚拟地址空间，页表项的权限需要根据程序头中的p\_flags段权限转化。ELF头的entry字段记录了程序入口的虚拟地址。
+
+Moonix构建用户进程时，除去要映射用户程序的代码和数据到虚拟地址空间，还需要将内核映射到虚拟地址空间中，以保证用户进程在发起环境调用时，进程进入S-Mode，能够顺利进入内核处理调用。于是在构建用户进程时，解析ELF文件之前，Moonix首先会填充一个已经映射好内核的页表，随后在这个页表的基础上继续映射程序私有的代码数据。
+
 \section{用户态环境调用}
 
 shell是一个U-Mode进程，而内核运行在S-Mode下。通常，一个U-Mode进程的能力十分有限，大部分能力都需要依赖操作系统功能，甚至输出一个字符到屏幕上，都必须通过操作系统。U-Mode环境与内核唯一的沟通渠道，就是通过环境调用的方式。
@@ -45,8 +69,6 @@ typedef enum {
 })
 \end{lstlisting}
 \end{minipage}
-
-\section{用户态环境调用的处理}
 
 当一个U-Mode环境调用发生时，Moonix内核会接收到一个系统中断，中断类型是USER\_ENV\_CALL。Moonix随后会从a7寄存器中取出中断调用号，从a1、a2、a3寄存器中取出参数，根据调用号的类型进行不同的处理，并将返回值写入a0寄存器中，结束这次中断处理。
 
