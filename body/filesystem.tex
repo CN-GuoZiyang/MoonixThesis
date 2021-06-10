@@ -76,3 +76,54 @@ Moonix操作系统在启动初始化时，最后一步就是去初始化文件�
 文件系统驱动中，lookup函数是一个比较核心的函数。lookup函数将传入的Inode作为当前目录，从当前目录下根据路径查找文件。例如，若当前目录为/usr，传入./hello和hello甚至../usr/hello都可以找到可执行文件hello。如果传入的路径以/开头，函数会忽略当前路径而从根目录下开始查找。如果传入的Inode为null，函数也会从根目录开始查找。函数会根据路径分割出需要在当前目录下查找的文件或文件夹名称，并递归调用lookup函数进一步搜索。
 
 另一个比较核心的函数，是readall函数。readall函数传入一个文件类型的Inode。这个函数将该Inode所代表的文件数据全部拷贝到字节数组中。这个函数主要用于操作系统或者用户在执行某个可执行文件时，获取到Inode之后，需要将这个Inode所表示的文件拷贝到内核中。传入的字节数组通常是动态内存分配得到的，在操作系统解析并获取映射各个段之后，这个数组会被内核回收。
+
+\section{模块测试}
+
+Moonix挂载的文件系统内容，是将编译过程中产生的rootfs文件夹作为根目录进行打包。在rootfs文件夹下有一个bin文件夹，bin文件夹中存放着三个可执行文件，分别是hello、sh和fib50，这是三个用户程序。
+
+在打包完成后，使用测试脚本加载文件系统镜像后，输出信息如代码 \ref{lst:testfs} 所示。
+
+\begin{minipage}[c]{0.95\textwidth}
+\begin{lstlisting}[caption={测试文件系统镜像}, label={lst:testfs}]
+Superblock:
+magic: 0x4d534653
+blocks: 256
+unusedBlocks: 232
+freemapBlocks: 1
+info: SimpleFS By Ziyang
+
+filename: /
+blockNum: 2
+direct: 3
+
+filename: bin
+blockNum: 3
+direct: 4 10 18
+
+filename: hello
+blockNum: 4
+direct: 5 6 7 8 9
+
+filename: sh
+blockNum: 10
+direct: 11 12 13 14 15 16 17
+
+filename: fib50
+blockNum: 18
+direct: 19 20 21 22 23
+\end{lstlisting}
+\end{minipage}
+
+从超级块中的数据可见，该文件系统镜像共占据256个磁盘块，其中232个磁盘块未被使用，这意味着当前已经有24个磁盘块被占用。这是刚刚打包结束之后的结果，打包程序会尽可能紧凑地安排Inode和数据块，这里占用的是0-23号磁盘块。除了0号块是超级块，以及1号块是freemap块之外，剩下的都是Inode和数据块。
+
+随后，测试脚本输出了所有Inode块的信息。该文件系统一共包含了五个Inode块，其中文件夹类型的Inode块有两个，文件类型的Inode块有三个。从文件夹的direct字段也可以很清晰地看出文件夹与文件的包含关系。文件类型的Inode块中，direct字段代表了文件的数据存放的磁盘块。
+
+\begin{figure}[htpb]
+	\centering
+	\includegraphics[width=1.15\textwidth]{sfstest}
+	\setlength{\abovecaptionskip}{2pt}
+	\caption{Moonix初始文件系统结构}
+	\label{pic:sfstest}
+\end{figure}
+
+图 \ref{pic:sfstest} 展示了该文件系统镜像的基本结构，其中黑色箭头表示文件夹Inode和文件或其他文件夹Inode的包含关系，蓝色箭头表示文件Inode和数据块的包含关系。
