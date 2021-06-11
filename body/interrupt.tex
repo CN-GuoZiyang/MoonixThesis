@@ -36,9 +36,9 @@ Moonix中使用结构体InterruptContext来保存各种寄存器的信息，它�
 
 \subsection{保存中断上下文}
 
-中断上下文需要被保存在内核栈上，由于在进入中断之前，CPU可能位于U-Mode，也可能位于S-Mode，所以需要首先判断当前模式，如果跳转之前就位于S-Mode，则无需做处理；否则需要切换sp指针到内核栈。RISC-V指令集提供了sscratch寄存器，用于保存临时栈的指针。
+中断上下文需要被保存在内核栈上，由于在进入中断之前，CPU可能位于U-Mode，也可能位于S-Mode，所以需要首先判断当前模式，如果跳转之前就位于S-Mode，则无需做处理；否则需要切换sp指针指向内核栈顶。RISC-V指令集提供了sscratch寄存器，用于保存临时栈的指针。
 
-sscratch寄存器的使用方法可由操作系统来指定，指令集没有硬性要求，在Moonix中，若在中断之前处于U-Mode，则sscratch寄存器中保存的是内核栈地址；否则中断之前处于S-Mode，sscratch中保存的是0。这样，Moonix即可根据进入中断时的sscratch的值，来判断进入中断前的CPU状态。
+sscratch寄存器的使用方法可由操作系统来指定，指令集没有硬性要求。在Moonix中，若在中断之前处于U-Mode，则sscratch寄存器中保存的是内核栈地址；否则中断之前处于S-Mode，sscratch中保存的是0。这样，Moonix即可根据进入中断时的sscratch的值，来判断进入中断前的CPU状态。
 
 \begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={保存中断上下文}, label={lst:savecontext}]
@@ -84,7 +84,7 @@ from_user:
 \end{lstlisting}
 \end{minipage}
 
-整个保存操作实现见代码 \ref{lst:savecontext}。中断处理的入口函数为\_\_interrupt，即stvec中的BASE字段设置为\_\_interrupt的地址。Moonix首先判断中断发生前的CPU模式，并切换到内核栈，栈指针向下移动以在栈上留出一个InterruptContext的内存区域。在保存上下文操作完成后，将sscratch的值保存在s0寄存器中，并将sscratch清零，以保证在处理中断时再次发生中断后，能满足Moonix对sscratch的规定。保存完毕后，栈上布局如图 \ref{pic:interruptframe} 所示。注意，如果进入中断前位于U-Mode，则栈上x2指向原线程的用户栈顶。
+整个保存上下文的过程实现见代码 \ref{lst:savecontext}。中断处理的入口函数为\_\_interrupt，即stvec中的BASE字段设置为\_\_interrupt的地址。Moonix首先判断中断发生前的CPU模式，并切换到内核栈，栈指针向下移动以在栈上留出一个InterruptContext的内存区域。在保存上下文操作完成后，将sscratch的值保存在s0寄存器中，并将sscratch清零，以保证在处理中断时再次发生中断后，能满足Moonix对sscratch的规定。保存完毕后，栈上布局如图 \ref{pic:interruptframe} 所示。注意，如果进入中断前位于U-Mode，则栈上x2指向原线程的用户栈顶。
 
 \begin{figure}[htpb]
 	\centering
@@ -106,7 +106,7 @@ from_user:
 
 Moonix最后执行sret指令，控制流将跳转到sepc寄存器中保存的地址处，即中断发生的位置。同时，CPU会被设置为sstatus中的SPP位标记的模式，由于中断处理过程中没有对sstatus寄存器做过修改，所以会切换会进入中断前的模式。
 
-在Moonix线程创建时，将借助中断恢复的机制来对线程的模式和寄存器等进行设置填充，以进行初始化。更具体的细节见第 \ref{chapter:thread} 章。
+在Moonix中创建线程时，会借助中断恢复的机制来对线程的模式和寄存器等进行设置填充，以进行初始化。更具体的细节见第 \ref{chapter:thread} 章。
 
 
 \begin{minipage}[c]{0.95\textwidth}
@@ -149,7 +149,7 @@ to_kernel:
 
 条件变量在Moonix中，主要用于实现标准输入缓冲。条件变量和标准输入缓冲主要基于这样的场景提出的：一个用户进程通过getc()函数发起了一个系统调用，用于获取一个键盘输入的字符，内核处理调用的时候发现，当前并没有字符输入。这时，一个很简单的想法就是进入一个忙循环，不断地检查是否有字符输入，直到有字符输入后再将其读出，系统调用返回。这种方式肯定能保证读到字符，但是线程会占用资源，什么都不做，浪费CPU资源，即使会被CPU调度，但是所有属于该线程的时间片都被浪费掉了。
 
-Moonix使用条件变量机制来解决这个问题，当线程检查到当前没有键盘输入时，就自动进入睡眠状态，同时不再参与调度，直到有字符输入时，才会将这个线程唤醒参与调度，这个时候被唤醒的线程就一定可以获取到字符并返回了。这样这个问题就被转化成了一个典型的生产者消费者问题。
+Moonix使用条件变量机制来解决这个问题，当线程尝试获取键盘输入时，当前没有字符输入，就进入睡眠状态，不再参与线程调度，直到有字符输入时，才会将这个线程唤醒参与调度，这个时候被唤醒的线程就一定可以获取到字符并返回了。这样这个问题就被转化成了一个典型的生产者消费者问题。
 
 标准输入缓冲维护了一个字符队列和一个条件变量，而条件变量也只是维护了一个等待队列，保存了等待条件满足的线程的tid。Moonix定义结构如代码 \ref{lst:stdin} 所示。
 

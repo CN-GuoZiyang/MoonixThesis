@@ -7,17 +7,17 @@
 
 Moonix采用两种粒度来对可用的内存进行管理。一种是动态内存分配，另一种是按页进行的内存分配。动态内存分配用于在运行时程序主动请求少量内存的情况。对Moonix来说，动态内存分配的目标是BSS段中一个8 MB大的内存空间；对于应用程序来说，应用程序运行环境也为每个进程都提供了一片内存空间用于动态内存分配。Moonix采用Buddy System Allocation算法来对堆空间进行管理，并按照最小64字节的粒度对堆空间进行划分分配。按页内存分配的分配主体是除去内核以外的所有空闲物理内存，Moonix使用一棵线段树来维护这段内存空间的使用情况。这两种分配都采用外挂式数据结构实现，以降低侵入性和代码耦合度。Moonix同样需要借助按页内存分配来实现物理内存映射到虚拟内存空间。
 
-Moonix采用Rv64架构提供的Sv39系统来实现虚拟内存。在操作系统初始化时，Moonix就会将内核映射到虚拟地址空间，并在创建用户进程的时候都会创建独立的虚拟地址空间，即创建不同的页表来表示不同的映射模式。这样可以将不同进程的代码和数据隔离，在切换到进程时，需要切换到对应进程的页表，这部分将在第 \ref{chapter:thread} 章具体描述。
+Moonix采用Rv64架构提供的Sv39系统来实现虚拟内存。在操作系统初始化时，Moonix就会将内核映射到虚拟地址空间，并在创建用户进程的时候都会创建独立的虚拟地址空间，即创建不同的页表来表示不同的映射模式。这样可以将不同进程的代码和数据隔离，在切换到进程时，需要切换到对应进程的页表。
 
 \section{动态内存分配}
 
-\subsection{Buddy System Allocation算法概述}
+\subsection{Buddy System Allocation算法简述}
 
 动态内存分配是在程序运行过程中，程序动态请求内存空间，操作系统响应而进行的内存分配。通常，操作系统会为每个进程分配一块堆内存空间，该进程执行过程中的动态内存分配都在这块内存上进行。那么该使用怎么的策略进行内存分配就成了操作系统亟待解决的问题。
 
 一个很简单的想法就是，我们可以不断地分配最小的可用地址，这样一直分配下去，内存看起来都是连续的。
 但是，在此过程中，如果中间有一块内存被回收了，那么这块内存即使是可用的，但是由于其两边都是被占用的内存，这块空闲区间已经无法被扩展，最终形成外部碎片。
-随着不断回收和分配内存，整块内存区间可能产生越来越多的外部碎片，以至于某个时刻，我们可能需要分配一块较大的内存，几个外部碎片的空间之和是足够的，但是单个外部碎片是无法满足需要的。这时可能会想到JVM中的标记整理算法，通过将所有可用的内存向一边移动，来减少外部碎片，这种方式的开销较大，因为操作系统不得不同步更改所有代码或数据中的地址。
+随着不断回收和分配内存，整块内存区间可能产生越来越多的外部碎片，以至于某个时刻，我们可能需要分配一块较大的内存，几个外部碎片的空间之和是足够的，但是单个外部碎片是无法满足需要的。这时可能会想到JVM中的标记整理算法，通过将所有可用的内存向一边移动，来减少外部碎片，这种方式的开销较大，因为操作系统不得不同步更改所有代码或数据中的地址，或者额外维护一个“引用池”。
 
 Buddy System Allocation是一种经典的内存分配算法\cite{DBLP:journals/acta/BrodalDM05}，被大量操作系统实现使用，包括Linux。Buddy System将整块内存按2的幂划分成若干小块，并搜索由小块形成的空闲链表并给出所需求的最佳匹配的大小。该算法的优点可以以较小的时间复杂度（O(logN)）快速寻找到合适的空闲块，同时可以快速合并两个相邻的同大小空闲块。同时，由于采用最佳适配的策略，使用该算法进行内存分配会产生较少的外部碎片。该算法的缺点是会产生内部碎片，例如如果要分配66个单位，那么必须划分128单位的块，内部多出来的内存空间就无法被使用了。
 
@@ -76,7 +76,7 @@ struct
 
 \vspace{12 pt}
 
-分配过程对应于算法 \ref{alg:kalloc}。其中算法第四行中优先寻找较小的且满足条件的块，这样分配会尽量保留大块，减小外部碎片。该算法的另一个实现可能会寻找第一个满足条件的块，这样会产生较多的外部碎片而导致分配效率降低。
+分配过程对应于算法 \ref{alg:kalloc}。其中算法第四行中优先寻找较小的且满足条件的块，这样分配会尽量保留大块，减小外部碎片。该算法的另一个实现版本──优先适配版本——会倾向于寻找第一个满足条件的块，这样会产生较多的外部碎片而导致分配效率降低。
 
 注意在分配时，只会标记被分配节点的使用情况，而不会修改其下级节点的值，这样是为了在回收时可以快速确定最初被分配出去的节点。
 
@@ -139,30 +139,30 @@ Moonix中，为了方便操作页表和页表项相关的数据结构，将相�
 
 \begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={查找页表项}, label={lst:createpagetable}]
-	PageTableEntry
-	*findEntry(Mapping self, usize vpn)
-	{
-		PageTable *rootTable = (PageTable *)accessVaViaPa(self.rootPpn << 12);
-		usize *levels = getVpnLevels(vpn);
-		PageTableEntry *entry = &(rootTable->entries[levels[0]]);
-		int i;
-		for(i = 1; i <= 2; i ++) {
-			if(*entry == 0) {
-				// 页表不存在，创建新页表
-				usize newPpn = allocFrame() >> 12;
-				*entry = (newPpn << 10) | VALID;
-			}
-			usize nextPageAddr = (*entry & PDE_MASK) << 2;
-			entry = &(((PageTable *)accessVaViaPa(nextPageAddr))->entries[levels[i]]);
+PageTableEntry
+*findEntry(Mapping self, usize vpn)
+{
+	PageTable *rootTable = (PageTable *)accessVaViaPa(self.rootPpn << 12);
+	usize *levels = getVpnLevels(vpn);
+	PageTableEntry *entry = &(rootTable->entries[levels[0]]);
+	int i;
+	for(i = 1; i <= 2; i ++) {
+		if(*entry == 0) {
+			// 页表不存在，创建新页表
+			usize newPpn = allocFrame() >> 12;
+			*entry = (newPpn << 10) | VALID;
 		}
-		return entry;
+		usize nextPageAddr = (*entry & PDE_MASK) << 2;
+		entry = &(((PageTable *)accessVaViaPa(nextPageAddr))->entries[levels[i]]);
 	}
+	return entry;
+}
 \end{lstlisting}
 \end{minipage}
 
 \section{模块测试}
 
-内存管理模块主要测试物理地址映射到虚拟地址空间的过程。编写一测试脚本，以映射main函数的地址为例，测试脚本输出内容如代码 \ref{lst:memtest} 所示。
+内存管理测试主要模拟虚拟地址翻译到物理地址的过程。编写一测试脚本，以解析main函数的物理地址为例，测试脚本输出内容如代码 \ref{lst:memtest} 所示。
 
 \begin{minipage}[c]{0.95\textwidth}
 \begin{lstlisting}[language={C}, caption={main函数地址翻译}, label={lst:memtest}]
