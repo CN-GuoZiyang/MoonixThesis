@@ -179,3 +179,33 @@ struct
 
 \section{模块测试}
 
+中断模块测试主要测试在内核处理完中断后能否成功返回，如果能够成功返回中断发生的位置说明内核能够正常地保存和恢复中断上下文。
+
+测试脚本如代码 \ref{lst:interrupttest} 所示。
+
+\begin{minipage}[c]{0.95\textwidth}
+\begin{lstlisting}[language={C}, caption={断点中断测试函数}, label={lst:interrupttest}]
+void
+testInterrupt()
+{
+	printf("即将进入断点中断!\n");
+	asm volatile("ebreak" :::);
+	printf("从断点中返回!\n");
+}
+\end{lstlisting}
+\end{minipage}
+
+测试函数通过一个ebreak命令触发一个断点中断，并在中断返回后输出“从断点中返回”。运行后的结果如代码 \ref{lst:interrupttestres} 所示。
+
+\begin{minipage}[c]{0.95\textwidth}
+\begin{lstlisting}[caption={断点中断测试输出}, label={lst:interrupttestres}]
+即将进入断点中断!
+中断发生!
+scause: 0x3
+sepc: 0x80200522
+返回到 sepc：0x80200524
+从断点中返回!
+\end{lstlisting}
+\end{minipage}
+
+从输出中可见，在中断发生时，scause和sepc寄存器都被自动填入中断信息，其中scause中的内容是0x3，表示发生的中断是一个断点中断，sepc中的内容0x80200522，为ebreak指令所在的地址。如果不加处理，中断处理完成后会自动返回sepc保存的地址处，对于断点中断来说，还会返回到ebreak指令处，就会无限触发断点。由于ebreak指令宽两个字节，于是断点中断的处理，就是将sepc中的地址，加上两个字节，指向下一条指令，这样从中断处理返回时即可跳过断点中断。在输出中也可看出，中断返回到了ebreak的下一条语句printf处，并正确输出了后续内容。

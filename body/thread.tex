@@ -133,11 +133,11 @@ idleMain()
 			// 有线程可以运行
 			CPU.current = rt;
 			CPU.occupied = 1;
-			printf("\n>>>> will switch_to thread %d in idle_main!\n", CPU.current.tid);
+			printf("\n>>>> 从idleMain中切换到线程 %d!\n", CPU.current.tid);
 			switchThread(&CPU.idle, &CPU.current.thread);
 			
 			// 切换回 idle 线程处
-			printf("<<<< switch_back to idle in idle_main!\n");
+			printf("<<<< 从idleMain中切换回idle线程!\n");
 			CPU.occupied = 0;
 			retrieveToPool(&CPU.pool, CPU.current);
 		} else {
@@ -186,3 +186,41 @@ typedef struct
 \end{minipage}
 
 \section{模块测试}
+
+线程管理模块主要测试线程在运行时间片耗尽后，能否被内核调度抢占，切换到其他线程，并在某个时刻再切换回来。
+
+测试脚本会创建三个用户线程，每个线程都执行同样的功能，就是将自己收到的参数打印1000遍后退出，目的是尽可能得占用时间片，以测试能否成功强占。为了简易起见，给每个线程编的序号就是传入的参数，分别为0-2。将五个线程加载到CPU上执行后的输出代码 \ref{lst:threadtest} 所示，由于输出次数较多，这里简化表示。
+
+\begin{minipage}[c]{0.95\textwidth}
+\begin{lstlisting}[caption={线程调度测试}, label={lst:threadtest}]
+>>>> 从idleMain中切换到线程 0!
+线程 0 开始
+00000000000000000000000000000000
+<<<< 从idleMain中切换回idle线程!
+
+>>>> 从idleMain中切换到线程 1!
+线程 1 开始
+11111111111111111111111111111111111111111111111111111111111
+线程 1 结束
+<<<< 从idleMain中切换回idle线程!
+
+>>>> 从idleMain中切换到线程 2!
+线程 2 开始
+22222222222222222222222222
+<<<< 从idleMain中切换回idle线程!
+
+>>>> 从idleMain中切换到线程 0!
+0000000000000000000000000000000
+线程 0 结束
+<<<< 从idleMain中切换回idle线程!
+
+>>>> 从idleMain中切换到线程 2!
+2222222222222222222222222222222222
+线程 2 结束
+<<<< 从idleMain中切换回idle线程!
+
+暂无可执行线程!
+\end{lstlisting}
+\end{minipage}
+
+从测试输出中可以看出，在内核开始调度线程时，首先线程0占用了CPU开始执行，在一个时间片之后，线程0没有执行结束，就被idle线程强占，内核重新进行调度，同时线程0被移动到了就绪队列的最后。idle调度线程1占用CPU运行，在线程1占用的一个时间片内，线程1执行完成并正常退出，于是内核重新进行调度，线程2开始占用CPU运行，线程2同样在一个时间片内没有执行完成就被调度线程强占。此时，就绪队列中只剩下了线程0和线程2，在下一轮的调度中它们都成功执行完流程并退出，调度器随后就进入了无就绪线程可调度的状态了。
