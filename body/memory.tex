@@ -29,7 +29,7 @@ Moonix使用一棵二叉树来存储每一级范围内的最大连续空闲块�
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.65\textwidth]{buddysystem}
+	\includegraphics[width=0.65\textwidth]{buddysystem.png}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{保存中断上下文}
 	\label{pic:buddysystem}
@@ -37,7 +37,7 @@ Moonix使用一棵二叉树来存储每一级范围内的最大连续空闲块�
 
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={动态内存分配管理二叉树}, label={lst:mallocbinary}]
+\begin{lstlisting}[language={moonix}, caption={动态内存分配管理二叉树}, label={lst:mallocbinary}]
 struct
 {
 	int size;
@@ -99,7 +99,7 @@ Moonix使用一棵非递归线段树来对这块内存进行管理。事实上�
 Moonix使用Sv39系统来实现虚拟地址空间，以实现进程间代码数据隔离与共享，并固定进程的内存布局，降低应用程序编写的难度。同时，通过页表还可以提供对特定内存区域的访问控制，以防止恶意应用程序任意读写执行内存。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={页表相关数据结构定义}, label={lst:pagetable}]
+\begin{lstlisting}[language={moonix}, caption={页表相关数据结构定义}, label={lst:pagetable}]
 typedef usize PageTableEntry;   /* 页表项长度 64 位 */
 /*
 * 页表由页表项组成 
@@ -118,13 +118,13 @@ Moonix将内核区域分成如表 \ref{tab:sectionprivilege} 所示的几个部�
 	\centering
 	\caption{Moonix中各个段权限}
 	\label{tab:sectionprivilege}
-	\begin{tabular}{|c|c|c|c|}
+	\begin{tabular}{cccc}
 		\hline
 		段名      & 可读 & 可写 & 可执行 \\ \hline
-		.text   & 是  & 否  & 是   \\ \hline
-		.rodata & 是  & 否  & 否   \\ \hline
-		.data   & 是  & 是  & 否   \\ \hline
-		.bss    & 是  & 是  & 否   \\ \hline
+		.text   & 是  & 否  & 是   \\
+		.rodata & 是  & 否  & 否   \\
+		.data   & 是  & 是  & 否   \\
+		.bss    & 是  & 是  & 否   \\
 		剩余空间    & 是  & 是  & 否   \\ \hline
 	\end{tabular}
 \end{table}
@@ -138,7 +138,7 @@ Moonix中，为了方便操作页表和页表项相关的数据结构，将相�
 同样，当用户进程执行时，除了要将内核映射到用户进程的高地址处以外，还需要将进程自己的代码和数据映射到虚拟地址空间的低地址位，同时，还需要设置进程的代码和数据的页表项的U标志位，以保证该内存区域可以在U-Mode下访问。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={查找页表项}, label={lst:createpagetable}]
+\begin{lstlisting}[language={moonix}, caption={查找页表项}, label={lst:createpagetable}]
 PageTableEntry
 *findEntry(Mapping self, usize vpn)
 {
@@ -195,7 +195,7 @@ level 3 条目：0x000000002008080b
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.9\textwidth]{memtest}
+	\includegraphics[width=0.9\textwidth]{memtest.png}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{main地址翻译过程}
 	\label{pic:memtest}

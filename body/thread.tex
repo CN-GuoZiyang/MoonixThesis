@@ -24,7 +24,7 @@ Moonix中线程状态由线程池维护，线程的状态分为四种，分别�
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.7\textwidth]{threadstatus}
+	\includegraphics[width=0.7\textwidth]{threadstatus.png}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{保存中断上下文}
 	\label{pic:threadstatus}
@@ -35,7 +35,7 @@ Moonix中线程状态由线程池维护，线程的状态分为四种，分别�
 Moonix中将线程结构定义为如代码 \ref{lst:threadstructure} 的结构体。而实际上，在执行中，并不会用到kstack域，启动和切换基本只涉及contextAddr域。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={线程结构定义}, label={lst:threadstructure}]
+\begin{lstlisting}[language={moonix}, caption={线程结构定义}, label={lst:threadstructure}]
 typedef struct {
 	usize contextAddr;  /* 线程上下文存储的地址 */
 	usize kstack;       /* 线程栈底地址 */
@@ -52,7 +52,7 @@ typedef struct {
 \end{itemize}
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={线程上下文定义}, label={lst:threadcontext}]
+\begin{lstlisting}[language={moonix}, caption={线程上下文定义}, label={lst:threadcontext}]
 typedef struct {
 	usize ra;
 	usize satp;
@@ -78,19 +78,19 @@ Moonix中，调度器scheduler只是对线程的id进行调度管理，和实际
 通过线程池，线程的调度会被线程池中的Scheduler代理实现，从Scheduler中获取到线程id后，再由线程池在threads数组中操作真正的线程结构。当一个新线程被创建时，也需要由线程池分配一个可用的线程id。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={线程池定义}, label={lst:threadpool}]
-	/* 线程池中的线程信息槽 */
-	typedef struct {
-		Status status;
-		int tid;
-		int occupied;       /* 该槽位是否被占用 */
-		Thread thread;
-	} ThreadInfo;
+\begin{lstlisting}[language={moonix}, caption={线程池定义}, label={lst:threadpool}]
+/* 线程池中的线程信息槽 */
+typedef struct {
+	Status status;
+	int tid;
+	int occupied;       /* 该槽位是否被占用 */
+	Thread thread;
+} ThreadInfo;
 	
-	typedef struct {
-		ThreadInfo threads[MAX_THREAD];
-		Scheduler scheduler;
-	} ThreadPool;
+typedef struct {
+	ThreadInfo threads[MAX_THREAD];
+	Scheduler scheduler;
+} ThreadPool;
 \end{lstlisting}
 \end{minipage}
 
@@ -108,7 +108,7 @@ Moonix所有的运行流程都是运行在线程中的，由于要对所有的�
 Moonix中定义了一个结构体Processor，用来保存调度线程参与调度所需要的所有信息，如代码 \ref{lst:processor}。其中idle字段就是调度线程，current字段描述了当前正在运行线程的信息，occupied字段表示当前是否有线程（除了调度线程）正在运行。Idle线程所有的调度都是直接依赖Processor结构进行的。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={Processor结构体}, label={lst:processor}]
+\begin{lstlisting}[language={moonix}, caption={Processor结构体}, label={lst:processor}]
 typedef struct {
 	ThreadPool pool;
 	Thread idle;
@@ -121,7 +121,7 @@ typedef struct {
 Idle线程的入口点即为idleMain函数，如代码 \ref{lst:idlemain} 所示。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={idleMain函数}, label={lst:idlemain}]
+\begin{lstlisting}[language={moonix}, caption={idleMain函数}, label={lst:idlemain}]
 void
 idleMain()
 {
@@ -155,7 +155,7 @@ idleMain函数首先关闭中断响应，以防止调度过程被中断打断，
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.75\textwidth]{threadswitch}
+	\includegraphics[width=0.75\textwidth]{threadswitch.png}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{线程切换时间线}
 	\label{pic:threadswitch}
@@ -174,7 +174,7 @@ Round-Robin算法是一种抢占式调度算法，这意味着如果线程在其
 Moonix使用一个双向环形链表来实现队列，链表的节点按照tid+1作为下标存放在数组中，其中下标0处为Dummy Head，用于快速找到队列头。队列中的元素如代码 \ref{lst:rrinfo} 所示，并不保存实际的线程结构，仅仅以下标记录线程的tid。这种方式侵入性较小，调度器只会向内核返回下一个需要执行的线程的tid，耦合度较低，方便替换和扩展不同的调度算法。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={线程调度器元素}, label={lst:rrinfo}]
+\begin{lstlisting}[language={moonix}, caption={线程调度器元素}, label={lst:rrinfo}]
 typedef struct
 {
 	int valid;

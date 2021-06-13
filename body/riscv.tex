@@ -16,12 +16,12 @@ RISC-V规范规定了三种特权模式，在任何时候，RISC-V架构上运�
 	\setlength{\belowcaptionskip}{2pt}
 	\caption{RISC-V的三种特权模式}
 	\label{tab:privilege}
-	\begin{tabular}{|c|c|c|c|}
+	\begin{tabular}{cccc}
 		\hline
 		等级 & 编码 & 名称                          & 简写 \\ \hline
-		0  & 00 & 用户/应用程序模式（User/Application） & U  \\ \hline
-		1  & 01 & 监管者模式（Supervisor）           & S  \\ \hline
-		2  & 10 & 未定义                         &    \\ \hline
+		0  & 00 & 用户/应用程序模式（User/Application） & U  \\ 
+		1  & 01 & 监管者模式（Supervisor）           & S  \\ 
+		2  & 10 & 未定义                         &    \\ 
 		3  & 11 & 机器模式（Machine）               & M  \\ \hline
 	\end{tabular}
 \end{table}
@@ -48,11 +48,11 @@ RISC-V架构通过mstatus中的三个权限位管理全局的中断使能，分�
 	\setlength{\belowcaptionskip}{2pt}
 	\caption{mtvec中MODE字段}
 	\label{tab:mtvec}
-	\begin{tabular}{|c|c|c|}
+	\begin{tabular}{ccc}
 		\hline
 		MODE             & 名称       & 描述                                        \\ \hline
-		0                & Direct   & 所有中断发生时，都会跳转到BASE处                        \\ \hline
-		1                & Vectored & 中断发生时，跳转到BASE+4*xcause中所保存的地址处 \\ \hline
+		0                & Direct   & 所有中断发生时，都会跳转到BASE处                        \\
+		1                & Vectored & 中断发生时，跳转到BASE+4*xcause中所保存的地址处 \\
 		\textgreater{}=2 & —        & —                                         \\ \hline
 	\end{tabular}
 \end{table}
@@ -70,12 +70,12 @@ RISC-V规范要求虚拟地址空间实现在S-Mode中，所以地址翻译相�
 	\setlength{\belowcaptionskip}{2pt}
 	\caption{satp中MODE字段}
 	\label{tab:satpmode}
-	\begin{tabular}{|c|c|c|}
+	\begin{tabular}{ccc}
 		\hline
 		MODE             & 名称       & 描述                                        \\ \hline
-		0                & Bare       & 不开启分页                                   \\ \hline
-		1                & Sv32       & 基于页的32位虚拟地址系统                      \\ \hline
-		8                & Sv39       & 基于页的39位虚拟地址系统                      \\ \hline
+		0                & Bare       & 不开启分页                                   \\ 
+		1                & Sv32       & 基于页的32位虚拟地址系统                      \\ 
+		8                & Sv39       & 基于页的39位虚拟地址系统                      \\ 
 		9                & Sv48       & 基于页的48位虚拟地址系统                      \\ \hline
 	\end{tabular}
 \end{table}

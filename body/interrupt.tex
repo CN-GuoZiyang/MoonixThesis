@@ -22,7 +22,7 @@
 因此，在处理中断前，Moonix需要保存所有可能被修改的寄存器，并在中断处理完成后恢复。这些包括所有的通用寄存器。同时由于scause、sepc和stval这三个寄存器，在中断发生时会被CPU自动写入中断相关信息，所以也需要额外保存。保存这三个中断信息寄存器的原因是为了使得Moonix支持中断的递归处理，即在某个中断处理的过程中，Moonix有能力保存中断处理的现场转而去处理另一个突然发生的中断。由于中断过程可能伴随特权级的变化，还需要多保存一个sstatus。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={上下文结构定义}, label={lst:context}]
+\begin{lstlisting}[language={moonix}, caption={上下文结构定义}, label={lst:context}]
 typedef struct
 {
 	usize x[32];
@@ -41,7 +41,7 @@ Moonix中使用结构体InterruptContext来保存各种寄存器的信息，它�
 sscratch寄存器的使用方法可由操作系统来指定，指令集没有硬性要求。在Moonix中，若在中断之前处于U-Mode，则sscratch寄存器中保存的是内核栈地址；否则中断之前处于S-Mode，sscratch中保存的是0。这样，Moonix即可根据进入中断时的sscratch的值，来判断进入中断前的CPU状态。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={保存中断上下文}, label={lst:savecontext}]
+\begin{lstlisting}[language={asm}, caption={保存中断上下文}, label={lst:savecontext}]
 __interrupt:
 	# 交换 sscratch 和 sp
 	csrrw   sp, sscratch, sp
@@ -88,7 +88,7 @@ from_user:
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.7\textwidth]{interruptframe}
+	\includegraphics[width=0.7\textwidth]{interruptframe.png}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{保存中断上下文}
 	\label{pic:interruptframe}
@@ -110,7 +110,7 @@ Moonix最后执行sret指令，控制流将跳转到sepc寄存器中保存的地
 
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={恢复中断上下文}, label={lst:restorecontext}]
+\begin{lstlisting}[language={asm}, caption={恢复中断上下文}, label={lst:restorecontext}]
 __restore:
 	# 恢复 CSR
 	LOAD    s1, 32
@@ -154,7 +154,7 @@ Moonix使用条件变量机制来解决这个问题，当线程尝试获取键�
 标准输入缓冲维护了一个字符队列和一个条件变量，而条件变量也只是维护了一个等待队列，保存了等待条件满足的线程的tid。Moonix定义结构如代码 \ref{lst:stdin} 所示。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={标准输入缓冲和条件变量}, label={lst:stdin}]
+\begin{lstlisting}[language={moonix}, caption={标准输入缓冲和条件变量}, label={lst:stdin}]
 typedef struct {
 	Queue waitQueue;
 } Condvar;
@@ -171,7 +171,7 @@ struct
 
 \begin{figure}[htpb]
 	\centering
-	\includegraphics[width=0.5\textwidth]{stdin}
+	\includegraphics[width=0.5\textwidth]{stdin.png}
 	\setlength{\abovecaptionskip}{2pt}
 	\caption{标准输入缓冲区示意}
 	\label{pic:stdin}
@@ -184,7 +184,7 @@ struct
 测试脚本如代码 \ref{lst:interrupttest} 所示。
 
 \begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={C}, caption={断点中断测试函数}, label={lst:interrupttest}]
+\begin{lstlisting}[language={moonix}, caption={断点中断测试函数}, label={lst:interrupttest}]
 void
 testInterrupt()
 {

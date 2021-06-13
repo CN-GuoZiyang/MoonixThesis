@@ -97,8 +97,28 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{listings}
+
+\lstdefinelanguage{moonix}[]{C}{
+	morekeywords={uint32, uint8, uint64, usize, Status}
+}
+
 \lstset{
-	language=C,
+	language=moonix,
+	keywordstyle=\color{blue!70},
+	basicstyle=\small\ttfamily,
+	numbers=left,
+	numberstyle=\tiny,
+	frame=tb,
+	columns=fullflexible,
+	showstringspaces=false
+}
+
+\lstdefinelanguage{asm}[]{C}{
+	morekeywords={csrrw, bnez, csrr, addi, SAVE, SAVE\_N, mv, jal, andi, csrw, sret, LOAD, LOAD\_N}
+}
+
+\lstset{
+	language=asm,
 	keywordstyle=\color{blue!70},
 	basicstyle=\small\ttfamily,
 	numbers=left,
