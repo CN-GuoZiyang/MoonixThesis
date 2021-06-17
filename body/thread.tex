@@ -51,17 +51,17 @@ typedef struct {
 	\item s0 \textasciitilde s11，函数调用中被调用者保存的寄存器
 \end{itemize}
 
-\begin{minipage}[c]{0.95\textwidth}
-\begin{lstlisting}[language={moonix}, caption={线程上下文定义}, label={lst:threadcontext}]
-typedef struct {
-	usize ra;
-	usize satp;
-	usize s[12];
-} ThreadContext;
-\end{lstlisting}
-\end{minipage}
-
 于是定义线程上下文如代码 \ref{lst:threadcontext}。
+
+\begin{minipage}[c]{0.95\textwidth}
+	\begin{lstlisting}[language={moonix}, caption={线程上下文定义}, label={lst:threadcontext}]
+		typedef struct {
+			usize ra;
+			usize satp;
+			usize s[12];
+		} ThreadContext;
+	\end{lstlisting}
+\end{minipage}
 
 Moonix在启动后，实际上是位于一个启动线程中的。Moonix需要构造一个“静止”的线程，一个静止线程的结构看起来就像是刚刚被CPU抢占后保存的结构。这样，当其他正在运行的线程切换到它时，就可以将寄存器和栈变成预期的初始化状态，并且跳转到程序的入口开始运行。
 
